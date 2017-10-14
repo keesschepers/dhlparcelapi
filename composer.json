@@ -1,0 +1,16 @@
+{
+    "name":         "keesschepers/dhlparcelapi",
+    "description":  "Integrates DHL parcel API",
+    "keywords":     ["dhl", "parcel", "api"],
+    "type":         "library",
+
+    "require": {
+        "php": ">=7.0.0"
+    },
+
+    "autoload": {
+        "psr-0": {
+            "Keesschepers\\DhlParcelApi": "src/"
+        }
+    }
+}
