@@ -5,7 +5,7 @@ namespace Keesschepers\DhlParcelApi;
 use Keesschepers\DhlParcelApi\DhlApiException;
 use GuzzleHttp\Client as GuzzleHttpClient;
 
-class Client
+class DhlClient
 {
     private $userId;
     private $key;
