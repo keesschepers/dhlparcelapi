@@ -12,6 +12,6 @@
         "psr-0": {
             "Keesschepers\\DhlParcelApi": "src/"
         }
-    }
+    },
     "target-dir": "Keesschepers/DhlParcelApi",
 }
