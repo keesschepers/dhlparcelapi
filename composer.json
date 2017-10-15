@@ -10,7 +10,7 @@
 
     "autoload": {
         "psr-0": {
-            "Keesschepers\\DhlParcelApi": "src/"
+            "Keesschepers\\DhlParcelApi": ""
         }
     },
     "target-dir": "Keesschepers/DhlParcelApi"
