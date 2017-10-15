@@ -28,13 +28,11 @@ class DhlClient
             '/time-windows',
             [
                 'timeout' => ($this->apiTimeout / 1000),
-            ],
-            [
-                'query' => ['countryCode' => $countryCode, 'postalCode' => $postalCode]
+                'query' => ['countryCode' => $countryCode, 'postalCode' => $postalCode],
             ]
         );
 
-        if (!$response->isSuccesfull()) {
+        if (200 !== $response->getStatusCode()) {
             throw new DhlApiException('Could not retrieve time window information due to API server error.');
         }
 
