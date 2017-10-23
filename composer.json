@@ -5,7 +5,8 @@
     "type":         "library",
 
     "require": {
-        "php": ">=7.0.0"
+        "php": ">=7.0.0",
+        "kamermans/guzzle-oauth2-subscriber": "~1.0"
     },
 
     "autoload": {
