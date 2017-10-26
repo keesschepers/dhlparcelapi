@@ -4,6 +4,7 @@ namespace Keesschepers\DhlParcelApi;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Exception\BadResponseException;
 use kamermans\OAuth2\GrantType\ClientCredentials;
 use kamermans\OAuth2\OAuth2Middleware;
 use Keesschepers\DhlParcelApi\DhlApiException;
@@ -69,19 +70,18 @@ class DhlClient
     {
         $this->setupClient();
 
-        $response = $this->httpClient->post(
-            '/labels',
-            [
-                'timeout' => ($this->apiTimeout / 1000),
-                'json' => $parameters,
-            ]
-        );
-
-        if (201 !== $response->getStatusCode()) {
-            throw new DhlApiException(sprintf('Could not could not create a label due to API server error: %s', $response->getBody()->getContents()));
+        try {
+            $response = $this->httpClient->post(
+                '/labels',
+                [
+                    'timeout' => ($this->apiTimeout / 1000),
+                    'json' => $parameters,
+                ]
+            );
+        } catch (BadResponseException $e) {
+            throw new DhlApiException(sprintf('Could not could not create a label due to API server error: %s', $e->getResponse()->getBody(true)));
         }
 
-        var_dump(json_decode($response->getBody()->getContents(), true));
-        return json_decode($response->getBody()->getContents(), true);
+        return new DhlParcel(json_decode($response->getBody()->getContents(), true));
     }
 }
