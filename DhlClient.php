@@ -31,20 +31,21 @@ class DhlClient
             return;
         }
 
-        $oAuthClient = new Client(['base_uri' => sprintf('%s/%s', self::ENDPOINT, 'authenticate/api-key')]);
-        $grantType = new OAuthDhlGrantType($oAuthClient, ['client_id' => $this->apiUserId, 'client_secret' => $this->apiKey]);
-        $oauth = new OAuth2Middleware($grantType);
+        $config = ['base_uri' => self::ENDPOINT];
+        
+        if (!empty($this->apiUserId) && !empty($this->apiKey)) {
+            $oAuthClient = new Client(['base_uri' => sprintf('%s/%s', self::ENDPOINT, 'authenticate/api-key')]);
+            $grantType = new OAuthDhlGrantType($oAuthClient, ['client_id' => $this->apiUserId, 'client_secret' => $this->apiKey]);
+            $oauth = new OAuth2Middleware($grantType);
 
-        $stack = HandlerStack::create();
-        $stack->push($oauth);
+            $stack = HandlerStack::create();
+            $stack->push($oauth);
+            
+            $config['handler'] = $stack;
+            $config['auth'] = 'oauth';
+        }
 
-        $this->httpClient = new Client(
-            [
-                'base_uri' => self::ENDPOINT,
-                'handler' => $stack,
-                'auth' => 'oauth',
-            ]
-        );
+        $this->httpClient = new Client($config);
     }
 
     public function timeWindows($countryCode, $postalCode)
