@@ -85,4 +85,23 @@ class DhlClient
 
         return new DhlParcel(json_decode($response->getBody()->getContents(), true));
     }
+    
+    public function trackAndTrace(array $orderReferences)
+    {
+        $this->setupClient();
+
+        $response = $this->httpClient->get(
+            '/track-trace',
+            [
+                'timeout' => ($this->apiTimeout / 1000),
+                'query' => ['key' => implode(',', $orderReferences)],
+            ]
+        );
+
+        if (200 !== $response->getStatusCode()) {
+            throw new DhlApiException('Could not retrieve track trace information due to API server error.');
+        }
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }
