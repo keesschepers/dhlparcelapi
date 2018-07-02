@@ -123,4 +123,22 @@ class DhlClient
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    public function findParcelShop($country, $id)
+    {
+        $this->setupClient();
+
+        $response = $this->httpClient->get(
+            sprintf('/parcel-shop-locations/%s/%s', strtolower($country), $id),
+            [
+                'timeout' => ($this->apiTimeout / 1000),
+            ]
+        );
+
+        if (200 !== $response->getStatusCode()) {
+            throw new DhlApiException('Could not retrieve track trace information due to API server error.');
+        }
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }
