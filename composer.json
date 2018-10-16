@@ -6,6 +6,7 @@
 
     "require": {
         "php": ">=7.0.0",
+        "ext-json": "*",
         "kamermans/guzzle-oauth2-subscriber": "~1.0"
     },
 

@@ -5,6 +5,7 @@ namespace Keesschepers\DhlParcelApi;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Psr7\Response;
 use kamermans\OAuth2\GrantType\ClientCredentials;
 use kamermans\OAuth2\OAuth2Middleware;
 use Keesschepers\DhlParcelApi\DhlApiException;
@@ -67,6 +68,31 @@ class DhlClient
         return json_decode($response->getBody()->getContents(), true);
     }
 
+    /**
+     * @param array $parameters
+     * @return mixed
+     * @throws \Keesschepers\DhlParcelApi\DhlApiException
+     */
+    public function createPickupRequest(array $parameters)
+    {
+        $this->setupClient();
+
+        try {
+            /** @var Response $response */
+            $response = $this->httpClient->post(
+                '/pickup-requests',
+                [
+                    'timeout' => ($this->apiTimeout / 1000),
+                    'json' => $parameters,
+                ]
+            );
+        } catch (BadResponseException $e) {
+            throw new DhlApiException(sprintf('Could not could not create a label due to API server error: %s', $e->getResponse()->getBody()));
+        }
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
     public function createLabel(array $parameters)
     {
         $this->setupClient();
@@ -85,7 +111,7 @@ class DhlClient
 
         return new DhlParcel(json_decode($response->getBody()->getContents(), true));
     }
-
+  
     public function trackAndTrace(array $orderReferences)
     {
         $this->setupClient();
