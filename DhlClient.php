@@ -33,7 +33,7 @@ class DhlClient
         }
 
         $config = ['base_uri' => self::ENDPOINT];
-        
+
         if (!empty($this->apiUserId) && !empty($this->apiKey)) {
             $oAuthClient = new Client(['base_uri' => sprintf('%s/%s', self::ENDPOINT, 'authenticate/api-key')]);
             $grantType = new OAuthDhlGrantType($oAuthClient, ['client_id' => $this->apiUserId, 'client_secret' => $this->apiKey]);
@@ -41,7 +41,7 @@ class DhlClient
 
             $stack = HandlerStack::create();
             $stack->push($oauth);
-            
+
             $config['handler'] = $stack;
             $config['auth'] = 'oauth';
         }
@@ -111,7 +111,7 @@ class DhlClient
 
         return new DhlParcel(json_decode($response->getBody()->getContents(), true));
     }
-    
+  
     public function trackAndTrace(array $orderReferences)
     {
         $this->setupClient();
@@ -121,6 +121,43 @@ class DhlClient
             [
                 'timeout' => ($this->apiTimeout / 1000),
                 'query' => ['key' => implode(',', $orderReferences)],
+            ]
+        );
+
+        if (200 !== $response->getStatusCode()) {
+            throw new DhlApiException('Could not retrieve track trace information due to API server error.');
+        }
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    public function findParcelShopLocations($postalCode, $country)
+    {
+        $this->setupClient();
+
+        $response = $this->httpClient->get(
+            sprintf('/parcel-shop-locations/%s', strtolower($country)),
+            [
+                'timeout' => ($this->apiTimeout / 1000),
+                'query' => ['limit' => 10, 'zipCode' => $postalCode],
+            ]
+        );
+
+        if (200 !== $response->getStatusCode()) {
+            throw new DhlApiException('Could not retrieve track trace information due to API server error.');
+        }
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    public function findParcelShop($country, $id)
+    {
+        $this->setupClient();
+
+        $response = $this->httpClient->get(
+            sprintf('/parcel-shop-locations/%s/%s', strtolower($country), $id),
+            [
+                'timeout' => ($this->apiTimeout / 1000),
             ]
         );
 
