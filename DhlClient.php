@@ -167,4 +167,25 @@ class DhlClient
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    public function pieces(string $pieceId, string $zipCode)
+    {
+        $this->setupClient();
+
+        $response = $this->httpClient->get(
+            sprintf('/pieces/%s/pod', $pieceId),
+            [
+                'timeout' => ($this->apiTimeout / 1000),
+                'query' => [
+                    'receiver.address.postalCode' => $zipCode,
+                ],
+            ]
+        );
+
+        if (200 !== $response->getStatusCode()) {
+            throw new DhlApiException('Could not retrieve pieces information due to API server error.');
+        }
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }
