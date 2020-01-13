@@ -30,6 +30,11 @@ class DhlParcel
         return $this->trackerCode;
     }
 
+    public function getLabelId()
+    {
+        return $this->labelId;
+    }
+
     public function getPdfContent()
     {
         return base64_decode($this->pdfContent);
