@@ -6,20 +6,18 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Response;
-use kamermans\OAuth2\GrantType\ClientCredentials;
 use kamermans\OAuth2\OAuth2Middleware;
-use Keesschepers\DhlParcelApi\DhlApiException;
 
 class DhlClient
 {
-    private $userId;
-    private $key;
-    private $httpClient;
+    private $apiUserId;
+    private $apiKey;
     private $apiTimeout;
+    private $httpClient;
 
     const ENDPOINT = 'https://api-gw.dhlparcel.nl';
 
-    public function __construct(String $userId = null, String $key = null, Float $apiTimeout = 0.5)
+    public function __construct(string $userId = null, string $key = null, float $apiTimeout = 0.5)
     {
         $this->apiUserId = $userId;
         $this->apiKey = $key;
@@ -35,8 +33,18 @@ class DhlClient
         $config = ['base_uri' => self::ENDPOINT];
 
         if (!empty($this->apiUserId) && !empty($this->apiKey)) {
-            $oAuthClient = new Client(['base_uri' => sprintf('%s/%s', self::ENDPOINT, 'authenticate/api-key')]);
-            $grantType = new OAuthDhlGrantType($oAuthClient, ['client_id' => $this->apiUserId, 'client_secret' => $this->apiKey]);
+            $oAuthClient = new Client(
+                [
+                    'base_uri' => sprintf('%s/%s', self::ENDPOINT, 'authenticate/api-key'),
+                ]
+            );
+            $grantType = new OAuthDhlGrantType(
+                $oAuthClient,
+                [
+                    'client_id' => $this->apiUserId,
+                    'client_secret' => $this->apiKey,
+                ]
+            );
             $oauth = new OAuth2Middleware($grantType);
 
             $stack = HandlerStack::create();
@@ -87,7 +95,12 @@ class DhlClient
                 ]
             );
         } catch (BadResponseException $e) {
-            throw new DhlApiException(sprintf('Could not could not create a label due to API server error: %s', $e->getResponse()->getBody()));
+            throw new DhlApiException(
+                sprintf(
+                    'Could not could not create a label due to API server error: %s',
+                    $e->getResponse()->getBody()
+                )
+            );
         }
 
         return json_decode($response->getBody()->getContents(), true);
@@ -106,12 +119,17 @@ class DhlClient
                 ]
             );
         } catch (BadResponseException $e) {
-            throw new DhlApiException(sprintf('Could not could not create a label due to API server error: %s', $e->getResponse()->getBody(true)));
+            throw new DhlApiException(
+                sprintf(
+                    'Could not could not create a label due to API server error: %s',
+                    $e->getResponse()->getBody()
+                )
+            );
         }
 
         return new DhlParcel(json_decode($response->getBody()->getContents(), true));
     }
-  
+
     public function trackAndTrace(array $orderReferences)
     {
         $this->setupClient();
@@ -163,6 +181,24 @@ class DhlClient
 
         if (200 !== $response->getStatusCode()) {
             throw new DhlApiException('Could not retrieve track trace information due to API server error.');
+        }
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    public function findLabel(string $labelId)
+    {
+        $this->setupClient();
+
+        $response = $this->httpClient->get(
+            sprintf('/labels/%s', $labelId),
+            [
+                'timeout' => ($this->apiTimeout / 1000),
+            ]
+        );
+
+        if ($response->getStatusCode() !== 200) {
+            throw new DhlApiException('Could not retrieve label information due to API server error.');
         }
 
         return json_decode($response->getBody()->getContents(), true);
