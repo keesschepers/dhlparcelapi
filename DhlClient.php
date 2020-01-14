@@ -129,7 +129,7 @@ class DhlClient
 
         return new DhlParcel(json_decode($response->getBody()->getContents(), true));
     }
-
+  
     public function trackAndTrace(array $orderReferences)
     {
         $this->setupClient();
